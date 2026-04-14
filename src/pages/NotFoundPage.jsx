@@ -1,43 +1,34 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { HelpCircle, Home } from 'lucide-react';
+import { FileQuestion, Home } from 'lucide-react';
+import Button from '../components/ui/Button';
 
 const NotFoundPage = () => {
   return (
-    <div className="container py-8" style={styles.container}>
-      <div style={styles.iconWrapper}>
-        <HelpCircle size={64} color="var(--primary-color)" />
+    <div className="container" style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      padding: 'var(--space-xxl) 0',
+      textAlign: 'center'
+    }}>
+      <div style={{ color: 'var(--text-muted)', marginBottom: 'var(--space-md)' }}>
+        <FileQuestion size={80} />
       </div>
-      <h1 style={{ fontSize: '3rem', marginBottom: '1rem' }}>404</h1>
-      <h2 style={{ marginBottom: '1.5rem', fontWeight: 500 }}>Page Not Found</h2>
-      <p className="text-muted" style={{ marginBottom: '2rem', maxWidth: '400px', lineHeight: 1.6 }}>
-        The page you are looking for doesn't exist or has been moved. 
-        Please check the URL or navigate back to the home page.
+      <h1 style={{ fontSize: '4rem', marginBottom: 'var(--space-xs)' }}>404</h1>
+      <h2>Page Not Found</h2>
+      <p className="text-muted" style={{ maxWidth: '400px', marginTop: 'var(--space-md)', marginBottom: 'var(--space-xl)' }}>
+        Oops! The page you're looking for doesn't exist or has been moved.
       </p>
-      
-      <Link to="/" className="btn btn-primary">
-        <Home size={18} />
-        Back to Home
+      <Link to="/">
+        <Button>
+          <Home size={18} />
+          Back to Homepage
+        </Button>
       </Link>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    textAlign: 'center',
-    minHeight: '60vh'
-  },
-  iconWrapper: {
-    backgroundColor: '#eff6ff',
-    padding: '1.5rem',
-    borderRadius: '50%',
-    marginBottom: '2rem'
-  }
 };
 
 export default NotFoundPage;

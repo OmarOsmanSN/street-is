@@ -1,32 +1,48 @@
-# Street Issue Reporter
+# StreetIssue Reporter
 
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)
+Professional frontend-only prototype for a community street issue reporting application.
 
-A frontend-only React application designed to mock a Street Issue Reporting system. It allows users to report street problems (like potholes, broken street lights) by submitting a form with an image, and it provides an admin dashboard to review and resolve these issues.
+## Overview
+StreetIssue Reporter is a React-based web application that allows citizens to report public infrastructure problems (like potholes, broken street lights, etc.) directly from their browser. It features an interactive map for location selection, image upload capabilities, and a comprehensive admin dashboard for management.
 
-## 🤖 For AI Assistants & Future Contributors
-If you (an AI agent) are tasked with continuing work on this repository, please review the documentation located in the `/docs` directory to understand the system map quickly:
-- [System Architecture](./docs/ARCHITECTURE.md) - Understanding the tech stack and folder structure.
-- [Data Model & LocalStorage](./docs/DATA_MODEL.md) - Understanding how state is persisted.
-- [Components Guide](./docs/COMPONENTS.md) - UI Hierarchy.
-- [Roadmap & AI Guidelines](./docs/ROADMAP.md) - Recommended next steps for development.
+## Key Features
+- **Public Reporting Flow**: Easy-to-use form with title, category, description, image upload, and map-based location selection.
+- **Interactive Map**: Integration with Leaflet for pinpointing exact issue locations.
+- **Admin Dashboard**: Manage reports with search, category filtering, and status tracking (New, In Progress, Resolved).
+- **Modern UI/UX**: Professional design system with clean aesthetics, responsive layout, and smooth animations.
+- **Local Persistence**: All data is stored in the browser's `localStorage`.
 
-## Setup & Running Locally
-This project leverages Vite and React.
+## Tech Stack
+- **Framework**: React 18+ (Vite)
+- **Routing**: React Router 7
+- **Icons**: Lucide React
+- **Mapping**: Leaflet & React-Leaflet
+- **Persistence**: browser localStorage API
+- **Styling**: Vanilla CSS with a centralized Design System
 
-1. **Install Dependencies**
+## Installation & Running
+1. **Clone the project**
+2. **Install Dependencies**:
    ```bash
    npm install
    ```
-2. **Start Development Server**
+   *Note: Ensure you run this to install React-Leaflet and Leaflet.*
+3. **Run Development Server**:
    ```bash
    npm run dev
    ```
+4. **Open in Browser**: Navigate to `http://localhost:5173` (or the port Vite provides).
 
-## Constraints
-This is a prototype system:
-- **No Backend**: No APIs, no servers.
-- **No Database**: Uses browser `localStorage` only.
-- **Image Uploads**: Images are encoded in `Base64` and stored inside `localStorage`. There is a strict 5MB limit.
-- **Mock Data**: If `localStorage` is empty upon running the app, it will automatically populate with dummy issues.
+## Project Structure
+- `src/components`: Reusable UI and feature components.
+- `src/layout`: Global layout components (AppLayout, NavBar, Footer).
+- `src/pages`: Individual page components.
+- `src/utils`: Helper functions and storage logic.
+- `src/constants`: App-wide constants and configuration.
+- `src/styles`: CSS variables and design system rules.
+
+## Future Improvements
+- Backend integration (Node.js/Firebase).
+- Real-time geocoding for address lookups.
+- User authentication and profiles.
+- Push notifications for status updates.

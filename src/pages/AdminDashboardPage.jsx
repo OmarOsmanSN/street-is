@@ -1,254 +1,150 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, SlidersHorizontal, Inbox } from 'lucide-react';
-import IssueCard from '../components/IssueCard';
-import { getReports, updateReportStatus } from '../utils/storage';
+import PageHeader from '../components/layout/PageHeader';
+import ReportCard from '../components/ReportCard';
+import EmptyState from '../components/EmptyState';
+import Card from '../components/ui/Card';
+import { getReports } from '../utils/storage';
+import { CATEGORIES, STATUS_OPTIONS } from '../constants';
+import { Search, Filter, SlidersHorizontal, BarChart3 } from 'lucide-react';
 
 const AdminDashboardPage = () => {
   const [reports, setReports] = useState([]);
   const [filteredReports, setFilteredReports] = useState([]);
-  
-  // Filter States
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-
-  const categories = [
-    'Road Damage', 'Lighting', 'Debris', 'Signage', 'Traffic Signals', 'Other'
-  ];
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
 
   useEffect(() => {
-    loadReports();
+    const data = getReports();
+    setReports(data);
+    setFilteredReports(data);
   }, []);
 
   useEffect(() => {
-    applyFilters();
-  }, [reports, searchTerm, statusFilter, categoryFilter]);
-
-  const loadReports = () => {
-    const data = getReports();
-    // Sort by newest first
-    data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    setReports(data);
-  };
-
-  const applyFilters = () => {
-    let result = [...reports];
+    let result = reports;
 
     if (searchTerm) {
-      const lowerTheme = searchTerm.toLowerCase();
       result = result.filter(r => 
-        r.title.toLowerCase().includes(lowerTheme) || 
-        r.location.toLowerCase().includes(lowerTheme)
+        r.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.locationText.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    if (statusFilter) {
-      result = result.filter(r => r.status === statusFilter);
+    if (filterCategory) {
+      result = result.filter(r => r.category === filterCategory);
     }
 
-    if (categoryFilter) {
-      result = result.filter(r => r.category === categoryFilter);
+    if (filterStatus) {
+      result = result.filter(r => r.status === filterStatus);
     }
 
     setFilteredReports(result);
-  };
+  }, [searchTerm, filterCategory, filterStatus, reports]);
 
-  const handleStatusChange = (id, newStatus) => {
-    updateReportStatus(id, newStatus);
-    loadReports(); // Reload to reflect changes globally
+  const stats = {
+    total: reports.length,
+    new: reports.filter(r => r.status === 'New').length,
+    inProgress: reports.filter(r => r.status === 'In Progress').length,
+    resolved: reports.filter(r => r.status === 'Resolved').length
   };
 
   return (
-    <div className="container py-8">
-      <div style={styles.header}>
+    <div className="container">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 'var(--space-md)', marginBottom: 'var(--space-xl)' }}>
         <div>
-          <h1>Admin Dashboard</h1>
-          <p className="text-muted" style={{ marginTop: '0.5rem' }}>
-            Manage and resolve reported street issues
-          </p>
-        </div>
-        <div style={styles.statBox}>
-          <div>
-            <div style={styles.statLabel}>Total Issues</div>
-            <div style={styles.statValue}>{reports.length}</div>
-          </div>
-          <div>
-            <div style={styles.statLabel}>New</div>
-            <div style={{...styles.statValue, color: 'var(--primary-color)' }}>
-              {reports.filter(r => r.status === 'New').length}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="card" style={styles.controlsContainer}>
-        <div style={styles.searchBox}>
-          <Search size={20} color="var(--text-muted)" style={styles.searchIcon} />
-          <input 
-            type="text" 
-            placeholder="Search by title or location..." 
-            className="form-control"
-            style={{ paddingLeft: '2.5rem' }}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+          <PageHeader 
+            title="Admin Dashboard" 
+            subtitle="View, track and manage all community-reported street issues."
           />
         </div>
         
-        <div style={styles.filterBox}>
-          <div style={styles.filterItem}>
-            <SlidersHorizontal size={18} color="var(--text-muted)" />
-            <select 
-              className="form-control" 
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              style={{ minWidth: '150px' }}
-            >
-              <option value="">All Statuses</option>
-              <option value="New">New</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Resolved">Resolved</option>
-            </select>
-          </div>
-
-          <div style={styles.filterItem}>
-            <Filter size={18} color="var(--text-muted)" />
-            <select 
-              className="form-control" 
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              style={{ minWidth: '150px' }}
-            >
-              <option value="">All Categories</option>
-              {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-          </div>
+        {/* Quick Stats */}
+        <div style={{ display: 'flex', gap: 'var(--space-md)', marginBottom: 'var(--space-xl)' }}>
+          {[
+            { label: 'Total', value: stats.total, color: 'var(--text-main)' },
+            { label: 'New', value: stats.new, color: 'var(--primary)' },
+            { label: 'Progress', value: stats.inProgress, color: 'var(--warning)' },
+            { label: 'Resolved', value: stats.resolved, color: 'var(--success)' },
+          ].map(s => (
+            <div key={s.label} style={{ textAlign: 'center', minWidth: '80px' }}>
+              <div style={{ fontSize: '1.25rem', fontWeight: '800', color: s.color }}>{s.value}</div>
+              <div style={{ fontSize: '0.625rem', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-muted)' }}>{s.label}</div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {filteredReports.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" style={styles.grid}>
-          {filteredReports.map(report => (
-            <IssueCard 
-              key={report.id} 
-              report={report} 
-              showStatusSelect={true}
-              onStatusChange={handleStatusChange}
+      <Card style={{ marginBottom: 'var(--space-xl)', padding: 'var(--space-md)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-md)' }}>
+          {/* Search */}
+          <div style={{ position: 'relative' }}>
+            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            <input 
+              type="text" 
+              placeholder="Search title or location..." 
+              className="input"
+              style={{ paddingLeft: '40px' }}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
+          </div>
+
+          {/* Category Filter */}
+          <div style={{ position: 'relative' }}>
+            <Filter size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            <select 
+              className="select" 
+              style={{ paddingLeft: '40px' }}
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+            >
+              <option value="">All Categories</option>
+              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+
+          {/* Status Filter */}
+          <div style={{ position: 'relative' }}>
+            <SlidersHorizontal size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            <select 
+              className="select" 
+              style={{ paddingLeft: '40px' }}
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="">All Statuses</option>
+              {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+            </select>
+          </div>
+        </div>
+      </Card>
+
+      {filteredReports.length > 0 ? (
+        <div className="grid grid-cols-1 grid-cols-2 grid-cols-3">
+          {filteredReports.map(report => (
+            <ReportCard key={report.id} report={report} />
           ))}
         </div>
       ) : (
-        <div style={styles.emptyState}>
-          <div style={styles.emptyIconWrapper}>
-            <Inbox size={48} color="var(--text-muted)" />
-          </div>
-          <h3>No reports found</h3>
-          <p className="text-muted" style={{ marginTop: '0.5rem' }}>
-            {reports.length === 0 ? "There are no reported issues yet." : "No issues match your current filters."}
-          </p>
-          {(searchTerm || statusFilter || categoryFilter) && (
-            <button 
-              className="btn btn-outline" 
-              style={{ marginTop: '1rem' }}
-              onClick={() => {
-                setSearchTerm('');
-                setStatusFilter('');
-                setCategoryFilter('');
-              }}
-            >
-              Clear Filters
-            </button>
-          )}
-        </div>
+        <EmptyState 
+          title={reports.length === 0 ? "No reports submitted yet" : "No matching reports"}
+          message={reports.length === 0 
+            ? "Reports submitted by users will appear here for you to manage." 
+            : "Try adjusting your search or filters to find what you're looking for."}
+          actionLabel={reports.length === 0 ? "Go to Home" : "Clear Filters"}
+          onAction={() => {
+            if (reports.length === 0) {
+              window.location.href = '/';
+            } else {
+              setSearchTerm('');
+              setFilterCategory('');
+              setFilterStatus('');
+            }
+          }}
+        />
       )}
     </div>
   );
-};
-
-// Handle responsive grid via inline styles where possible or rely on CSS classes if we had them.
-// We'll add some CSS variables via inline style for grid handling.
-const styles = {
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '2rem',
-    flexWrap: 'wrap',
-    gap: '1rem'
-  },
-  statBox: {
-    display: 'flex',
-    gap: '2rem',
-    backgroundColor: 'var(--surface-color)',
-    padding: '1rem 2rem',
-    borderRadius: 'var(--radius-lg)',
-    boxShadow: 'var(--shadow-sm)',
-    border: '1px solid var(--border-color)'
-  },
-  statLabel: {
-    fontSize: '0.875rem',
-    color: 'var(--text-muted)',
-    fontWeight: 500,
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em'
-  },
-  statValue: {
-    fontSize: '1.5rem',
-    fontWeight: 700,
-    color: 'var(--text-main)',
-    marginTop: '0.25rem'
-  },
-  controlsContainer: {
-    padding: '1.5rem',
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '1rem',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '2rem'
-  },
-  searchBox: {
-    position: 'relative',
-    flexGrow: 1,
-    minWidth: '250px',
-    maxWidth: '500px'
-  },
-  searchIcon: {
-    position: 'absolute',
-    left: '0.75rem',
-    top: '50%',
-    transform: 'translateY(-50%)'
-  },
-  filterBox: {
-    display: 'flex',
-    gap: '1rem',
-    flexWrap: 'wrap'
-  },
-  filterItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem'
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-    gap: '2rem'
-  },
-  emptyState: {
-    textAlign: 'center',
-    padding: '4rem 2rem',
-    backgroundColor: 'var(--surface-color)',
-    borderRadius: 'var(--radius-lg)',
-    border: '1px dashed var(--border-color)'
-  },
-  emptyIconWrapper: {
-    display: 'inline-flex',
-    padding: '1rem',
-    backgroundColor: 'var(--bg-color)',
-    borderRadius: '50%',
-    marginBottom: '1rem'
-  }
 };
 
 export default AdminDashboardPage;

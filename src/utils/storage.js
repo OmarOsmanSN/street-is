@@ -1,39 +1,65 @@
-export const STORAGE_KEY = 'street_issues_reports';
+import { STORAGE_KEY } from '../constants';
 
+/**
+ * Get all reports from localStorage
+ */
 export const getReports = () => {
-  const data = localStorage.getItem(STORAGE_KEY);
-  return data ? JSON.parse(data) : [];
+    try {
+        const data = localStorage.getItem(STORAGE_KEY);
+        return data ? JSON.parse(data) : [];
+    } catch (error) {
+        console.error('Error parsing localStorage data:', error);
+        return [];
+    }
 };
 
+/**
+ * Save reports array to localStorage
+ */
 export const saveReports = (reports) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+    } catch (error) {
+        console.error('Error saving to localStorage:', error);
+    }
 };
 
-export const addReport = (report) => {
-  const reports = getReports();
-  const newReport = {
-    ...report,
-    id: Date.now().toString(),
-    createdAt: new Date().toISOString(),
-    status: 'New',
-  };
-  reports.push(newReport);
-  saveReports(reports);
-  return newReport;
-};
-
-export const updateReportStatus = (id, newStatus) => {
-  const reports = getReports();
-  const reportIndex = reports.findIndex((r) => r.id === id);
-  if (reportIndex !== -1) {
-    reports[reportIndex].status = newStatus;
+/**
+ * Add a new report
+ */
+export const addReport = (reportData) => {
+    const reports = getReports();
+    const newReport = {
+        ...reportData,
+        id: crypto.randomUUID(),
+        status: 'New',
+        createdAt: new Date().toISOString()
+    };
+    
+    reports.unshift(newReport); // Add to beginning (newest first)
     saveReports(reports);
-    return reports[reportIndex];
-  }
-  return null;
+    return newReport;
 };
 
+/**
+ * Get a single report by ID
+ */
 export const getReportById = (id) => {
-  const reports = getReports();
-  return reports.find((r) => r.id === id) || null;
+    const reports = getReports();
+    return reports.find(r => r.id === id) || null;
+};
+
+/**
+ * Update the status of a report
+ */
+export const updateReportStatus = (id, newStatus) => {
+    const reports = getReports();
+    const index = reports.findIndex(r => r.id === id);
+    
+    if (index !== -1) {
+        reports[index].status = newStatus;
+        saveReports(reports);
+        return reports[index];
+    }
+    return null;
 };
